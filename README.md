@@ -114,7 +114,7 @@ This repository includes `render.yaml` for the API service.
 
 - Root directory: `backend`
 - Build command: `pip install -r requirements.txt`
-- Start command: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+- Start command: `sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT"`
 - Health check: `/api/v1/health`
 
 Required Render environment variables:
@@ -132,16 +132,16 @@ Required Render environment variables:
 - `ADMIN_USERNAME=<admin username>`
 - `ADMIN_PASSWORD=<admin password>`
 
-After first deploy, run migrations:
-
-```bash
-alembic upgrade head
-```
-
-Then run seed (optional but recommended for initial admin account):
+Run seed once (optional but recommended for initial admin account):
 
 ```bash
 python -m app.scripts.seed
+```
+
+If your Render service was created before this setup and you see errors like `relation "admin_users" does not exist`, run:
+
+```bash
+alembic upgrade head
 ```
 
 ### 2) Database on Neon
