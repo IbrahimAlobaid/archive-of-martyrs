@@ -64,16 +64,16 @@ class Settings(BaseSettings):
             return raw_value
 
         parsed_url = urlsplit(raw_value)
-        hostname = (parsed_url.hostname or "").lower()
-
-        if "neon.tech" not in hostname:
-            return raw_value
-
         query = dict(parse_qsl(parsed_url.query, keep_blank_values=True))
-        if "ssl" in query or "sslmode" in query:
-            return raw_value
 
-        query["sslmode"] = "require"
+        sslmode = query.pop("sslmode", None)
+        if sslmode and "ssl" not in query:
+            query["ssl"] = sslmode
+
+        hostname = (parsed_url.hostname or "").lower()
+        if "neon.tech" in hostname and "ssl" not in query:
+            query["ssl"] = "require"
+
         return urlunsplit(
             (
                 parsed_url.scheme,

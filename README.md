@@ -67,7 +67,7 @@ Copy `backend/.env.example` to `backend/.env`, then set values as needed:
 
 Notes:
 
-- `DATABASE_URL` accepts Neon connection strings. Plain `postgresql://` values are normalized to `postgresql+asyncpg://` automatically.
+- `DATABASE_URL` accepts Neon connection strings. Plain `postgresql://` values are normalized to `postgresql+asyncpg://`, and `sslmode` is converted to asyncpg-compatible `ssl` automatically.
 - In deployed environments (`APP_ENV=production`), set `ALLOW_LOCAL_MEDIA_FALLBACK=false` so Cloudinary is the primary media backend.
 
 ### Frontend (`frontend/.env`)
