@@ -23,6 +23,7 @@ services:
     environment:
       PROJECT_NAME: Martyrs Archive API
       API_V1_PREFIX: /api/v1
+      APP_ENV: development
       DATABASE_URL: ${DATABASE_URL:-postgresql+asyncpg://postgres:postgres@postgres:5432/martyrs_archive}
       JWT_SECRET_KEY: ${JWT_SECRET_KEY:-change-me-in-production}
       JWT_ALGORITHM: ${JWT_ALGORITHM:-HS256}
@@ -32,6 +33,7 @@ services:
       CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY:-}
       CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET:-}
       CLOUDINARY_FOLDER: ${CLOUDINARY_FOLDER:-martyrs-archive}
+      ALLOW_LOCAL_MEDIA_FALLBACK: ${ALLOW_LOCAL_MEDIA_FALLBACK:-true}
       MEDIA_BASE_URL: ${MEDIA_BASE_URL:-http://localhost:8000}
       LOCAL_MEDIA_DIR: ${LOCAL_MEDIA_DIR:-media}
       MAX_IMAGE_SIZE_MB: ${MAX_IMAGE_SIZE_MB:-5}

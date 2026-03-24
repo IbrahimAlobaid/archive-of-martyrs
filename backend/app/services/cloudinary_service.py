@@ -25,6 +25,10 @@ class CloudinaryService:
             and self.settings.CLOUDINARY_API_KEY
             and self.settings.CLOUDINARY_API_SECRET
         )
+
+        environment = self.settings.APP_ENV.lower().strip()
+        is_deployed_environment = environment in {"production", "prod", "staging"}
+        self.allow_local_fallback = self.settings.ALLOW_LOCAL_MEDIA_FALLBACK and not is_deployed_environment
         self.local_media_root = Path(self.settings.LOCAL_MEDIA_DIR)
 
         if self.enabled:
@@ -34,7 +38,7 @@ class CloudinaryService:
                 api_secret=self.settings.CLOUDINARY_API_SECRET,
                 secure=True,
             )
-        else:
+        elif self.allow_local_fallback:
             self.local_media_root.mkdir(parents=True, exist_ok=True)
 
     @staticmethod
@@ -71,7 +75,12 @@ class CloudinaryService:
 
     def upload_image(self, file: UploadFile, folder: str) -> UploadedAsset:
         if not self.enabled:
-            return self._local_upload(file, folder)
+            if self.allow_local_fallback:
+                return self._local_upload(file, folder)
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Cloudinary is required in this environment",
+            )
 
         try:
             result = cloudinary.uploader.upload(

@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 
 const mediaUrl = process.env.NEXT_PUBLIC_MEDIA_BASE_URL ?? "http://localhost:8000";
 const parsedMediaUrl = new URL(mediaUrl);
+const mediaProtocol = parsedMediaUrl.protocol === "https:" ? "https" : "http";
 
 const nextConfig: NextConfig = {
   images: {
@@ -10,7 +11,7 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "res.cloudinary.com" },
       { protocol: "https", hostname: "images.unsplash.com" },
       {
-        protocol: parsedMediaUrl.protocol.replace(":", ""),
+        protocol: mediaProtocol,
         hostname: parsedMediaUrl.hostname,
         port: parsedMediaUrl.port || undefined
       },
