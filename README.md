@@ -1,42 +1,44 @@
 # Martyrs Archive
 
-منصة تذكارية عربية (RTL) مخصصة لشهداء القرى والبلدات في **ريف حلب الجنوبي**، مع واجهة عامة سريعة ولوحة إدارة آمنة.
+Martyrs Archive is an Arabic-first (RTL) memorial platform dedicated to preserving the memory of martyrs from the villages and towns of the **Southern Aleppo countryside**.
+
+The project is designed with a calm, respectful tone and production-oriented architecture.
 
 ## Project Overview
 
-- **Public app (Next.js):** الصفحة الرئيسية، قائمة الشهداء، صفحة الشهيد، صفحة عن المنصة، صفحة إرسال تصحيح.
-- **Admin app (Next.js /admin):** تسجيل دخول JWT، إدارة الشهداء، إدارة القرى والبلدات، مراجعة التصحيحات.
-- **Backend API (FastAPI):** بنية معيارية (routers/services/repositories/schemas)، JWT auth، Cloudinary uploads، OpenAPI.
-- **Database (PostgreSQL):** نماذج Martyr / Village / GalleryImage / Submission / AdminUser.
+- **Public app (Next.js):** home page, martyrs listing, martyr profile page, about page, and correction/contact form.
+- **Admin app (`/admin`):** JWT login, martyr management, village/town management, and submission review.
+- **Backend API (FastAPI):** modular routers, schemas, services, repositories, JWT auth, OpenAPI docs.
+- **Database (PostgreSQL):** `Martyr`, `Village`, `GalleryImage`, `Submission`, and `AdminUser` models.
 
 ## Architecture
 
-```
+```txt
 frontend (Next.js App Router)
-  -> calls backend REST API
+  -> consumes backend REST API
 backend (FastAPI)
-  -> services layer
-  -> repositories layer
+  -> service layer
+  -> repository layer
   -> SQLAlchemy async
   -> PostgreSQL
-  -> Cloudinary (media)
+  -> Cloudinary or local media fallback
 ```
 
-## Stack
+## Tech Stack
 
 - Frontend: Next.js App Router, TypeScript, Tailwind CSS
 - Backend: FastAPI, Pydantic, SQLAlchemy 2.0 async
-- DB: PostgreSQL
+- Database: PostgreSQL
 - Migrations: Alembic
-- Auth: JWT (python-jose + passlib/bcrypt)
-- Media: Cloudinary
-- Testing: pytest (backend) + Vitest (frontend basic)
+- Auth: JWT (`python-jose` + `passlib/bcrypt`)
+- Media: Cloudinary (with local fallback)
+- Testing: pytest (backend), Vitest (frontend basic)
 - Lint/format: ESLint + Prettier (frontend), Ruff + Black (backend)
-- Containerization: Docker + docker-compose
+- Containerization: Docker + Docker Compose
 
 ## Repository Structure
 
-```
+```txt
 .
 ├─ frontend/
 ├─ backend/
@@ -48,7 +50,7 @@ backend (FastAPI)
 
 ### Backend (`backend/.env`)
 
-ابدأ بنسخ `backend/.env.example` إلى `backend/.env` ثم عدّل القيم:
+Copy `backend/.env.example` to `backend/.env`, then set values as needed:
 
 - `DATABASE_URL`
 - `JWT_SECRET_KEY`
@@ -63,44 +65,44 @@ backend (FastAPI)
 
 ### Frontend (`frontend/.env`)
 
-ابدأ بنسخ `frontend/.env.example` إلى `frontend/.env`:
+Copy `frontend/.env.example` to `frontend/.env`:
 
 - `NEXT_PUBLIC_SITE_URL`
 - `NEXT_PUBLIC_API_BASE_URL`
 - `BACKEND_INTERNAL_API_URL`
 - `NEXT_PUBLIC_MEDIA_BASE_URL`
 
-## Run With Docker
+## Run with Docker
 
-1. تأكد من وجود Docker و Docker Compose.
-2. (اختياري) أنشئ ملف `.env` في الجذر إذا أردت override للمتغيرات.
-3. شغّل الخدمات:
+1. Make sure Docker and Docker Compose are installed.
+2. (Optional) create a root `.env` file if you want to override compose defaults.
+3. Start services:
 
 ```bash
 docker compose up --build
 ```
 
-4. الروابط:
+4. Access URLs:
    - Frontend: `http://localhost:3000`
    - Backend API: `http://localhost:8000`
-   - OpenAPI docs: `http://localhost:8000/docs` و `http://localhost:8000/redoc`
+   - OpenAPI docs: `http://localhost:8000/docs` and `http://localhost:8000/redoc`
 
-5. نفّذ المايجريشن والـ seed داخل الحاويات:
+5. Run migrations and seed data inside containers:
 
 ```bash
 docker compose exec backend alembic upgrade head
 docker compose exec backend python -m app.scripts.seed
 ```
 
-## DB Migrations
+## Database Migrations
 
-داخل مجلد `backend/`:
+From the `backend/` directory:
 
 ```bash
 alembic upgrade head
 ```
 
-للإنشاء Migration جديدة:
+Create and apply a new migration:
 
 ```bash
 alembic revision --autogenerate -m "your message"
@@ -109,19 +111,19 @@ alembic upgrade head
 
 ## Seed Data
 
-بعد تنفيذ migrations:
+After migrations:
 
 ```bash
 python -m app.scripts.seed
 ```
 
-سيتم إنشاء:
+This creates:
 
-- مستخدم إدارة افتراضي من قيم `ADMIN_USERNAME` و `ADMIN_PASSWORD`
-- قرى وبلدات تجريبية من ريف حلب الجنوبي
-- سجلات شهداء تجريبية مع صور placeholder
+- default admin user from `ADMIN_USERNAME` and `ADMIN_PASSWORD`
+- demo villages/towns from Southern Aleppo countryside
+- demo martyr profiles with placeholder images
 
-## Running Frontend and Backend Separately
+## Run Frontend and Backend Separately
 
 ### Backend
 
@@ -145,30 +147,32 @@ npm run dev
 
 ## Admin Login
 
-- افتح: `http://localhost:3000/admin/login`
-- استخدم بيانات الإدارة من `backend/.env`:
+- Open: `http://localhost:3000/admin/login`
+- Use credentials from `backend/.env`:
   - `ADMIN_USERNAME`
   - `ADMIN_PASSWORD`
 
-## Cloudinary Configuration
+## Media Configuration
 
-1. أنشئ حساب Cloudinary.
-2. من لوحة Cloudinary انسخ:
+### Cloudinary
+
+1. Create a Cloudinary account.
+2. Copy these values from Cloudinary:
    - Cloud name
    - API key
    - API secret
-3. ضع القيم في `backend/.env`.
-4. عند رفع/استبدال الصور:
-   - يتم تخزين `secure_url` و `public_id` في قاعدة البيانات.
-   - يتم حذف الصورة القديمة من Cloudinary عند الاستبدال أو الحذف.
+3. Add them to `backend/.env`.
+4. On upload/replace, the app stores `secure_url` and `public_id` in the database and deletes old media when removed.
 
-### Local Upload Fallback (بدون Cloudinary)
+### Local Upload Fallback (No Cloudinary)
 
-- إذا كانت قيم Cloudinary فارغة، سيعمل النظام تلقائيًا بوضع **رفع محلي**.
-- تُحفَظ الصور داخل `backend/media/` وتُخدَّم عبر المسار `/media` من الـ API.
-- المتغيرات المرتبطة:
-  - `MEDIA_BASE_URL` (مثل `http://localhost:8000`)
-  - `LOCAL_MEDIA_DIR` (افتراضيًا `media`)
+If Cloudinary variables are empty, the app automatically uses local storage:
+
+- files are saved to `backend/media/`
+- files are served by the backend under `/media`
+- related env vars:
+  - `MEDIA_BASE_URL` (example: `http://localhost:8000`)
+  - `LOCAL_MEDIA_DIR` (default: `media`)
 
 ## Key API Endpoints
 
@@ -208,4 +212,4 @@ npm run lint
 
 ---
 
-هذا المشروع مُعد كقاعدة إنتاجية قابلة للتوسعة، مع مراعاة الطابع الإنساني الهادئ، والوضوح، والاحترام.
+This project is structured as a scalable production base, while preserving a respectful memorial tone, clear UX, and reliable moderation workflows.
